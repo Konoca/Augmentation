@@ -21,6 +21,8 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
+    "src",
+    "public/preload.js",
+    "public/electron.js"
   ]
 }
