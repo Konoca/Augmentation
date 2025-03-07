@@ -7,13 +7,16 @@ const path = require('node:path')
 let win;
 function createWindow() {
     win = new BrowserWindow({
-        width: 800,
-        height: 600,
+        //width: 800,
+        //height: 600,
         // webPreferences: {
         //     preload: path.join(__dirname, 'preload.js'),
         //     nodeIntegration: true,
         //     sandbox: false
         // }
+        frame: false,
+        useContentSize: true,
+        darkTheme: true,
     });
 
     win.loadURL(
