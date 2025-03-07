@@ -8,8 +8,7 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/files', (req, res, next) => {
-    const body = req.body;
-    const path = body['path'];
+    const { path } = req.body;
 
     if (!path) {
         res.statusCode = 400;
@@ -26,6 +25,30 @@ router.post('/files', (req, res, next) => {
 
         res.json(files);
     });
+});
+
+router.post('/download', (req, res, next) => {
+    const { path, download } = req.body;
+});
+
+router.post('/delete', (req, res, next) => {
+    const { path, filename } = req.body;
+
+    if (!path) {
+        res.statusCode = 400;
+        res.json({error: 'Missing path'});
+        return;
+    }
+
+    fs.rm(`${path}/${filename}`, (err) => {
+        if (err) {
+            res.statusCode = 400;
+            res.json(err);
+            return;
+        }
+
+        res.json({ msg: 'Success' });
+    })
 });
 
 module.exports = router;

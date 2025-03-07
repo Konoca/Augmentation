@@ -9,8 +9,7 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/info', (req, res, next) => {
-    const body = req.body;
-    const path = body['path'];
+    const { path } = req.body;
 
     if (!path) {
         res.statusCode = 400;

@@ -5,7 +5,7 @@ import { colors } from "../constants";
 import Mod from "../interfaces/mod";
 import ModInfo from "../interfaces/modinfo";
 import ModStatus from "../interfaces/modstatus";
-import { getModID, getModProvider, getModVersion } from "../utils/modinfo";
+import { getChanges, getModID, getModProvider, getModVersion } from "../utils/modinfo";
 
 interface ModGridProps {
     files: string[];
@@ -114,23 +114,9 @@ function ChangesTable(props: ModGridProps) {
     const [changes, setChanges] = React.useState<ModStatus[]>([]);
 
     React.useEffect(() => {
-        if (props.files.length === 0 || props.modpack.length === 0) return;
-        const tmp1: ModStatus[] = props.files.map((file) => {
-            if (props.modpack.find((mod) => mod.filename === file))
-                return {name: file};
-
-            return {name: file, toRemove: true};
-        })
-        .filter((mod) => mod.name !== '.index')
-
-        const tmp2: ModStatus[] = props.modpack.map((mod) => {
-            if (props.files.find((file) => mod.filename === file))
-                return { name: mod.filename };
-
-            return { name: mod.filename, toAdd: true };
-        })
-
-        setChanges([...tmp1, ...tmp2].sort((a, b) => a.name.localeCompare(b.name)));
+        const tmp = getChanges(props.files, props.modpack);
+        if (tmp)
+            setChanges(tmp);
     }, [props.files, props.modpack]);
 
     return (
@@ -174,10 +160,10 @@ function ModGrid(props: ModGridProps) {
         >
             <Box>
                 <StyledTabs value={tab} onChange={(_, newTab) => setTab(newTab)}>
-                    <StyledTab label={'Local Files'} />
-                    <StyledTab label={'Local Mod Info'} />
-                    <StyledTab label={'Modpack Info'} />
-                    <StyledTab label={'Affected Files'} />
+                    <StyledTab label={'Local Files'} sx={{ width: '25%' }} />
+                    <StyledTab label={'Local Mod Info'} sx={{ width: '25%' }} />
+                    <StyledTab label={'Modpack Info'} sx={{ width: '25%' }} />
+                    <StyledTab label={'Differences'} sx={{ width: '25%' }} />
                 </StyledTabs>
             </Box>
 

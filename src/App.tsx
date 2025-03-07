@@ -7,6 +7,7 @@ import ModInfo from './interfaces/modinfo';
 import { CustomSubTitle, CustomTitle } from './components/CustomTypography';
 import { colors } from './constants';
 import ModGrid from './components/ModGrid';
+import ExportButton from './components/UpdateButton';
 //import { changeTheme } from './utils/theme';
 
 function App() {
@@ -110,6 +111,7 @@ function App() {
             />
 
             <CustomTextField
+                required
                 id="textfield"
                 label="Modpack JSON String"
                 fullWidth
@@ -117,17 +119,12 @@ function App() {
                 error={jsonError}
             />
 
-            <Button
-                variant={'contained'}
-                style={{
-                    backgroundColor: colors.blue.hex,
-                    color: colors.surface1.hex
-                }}
-                fullWidth
-                sx={{ my: 1 }}
-            >
-                Update Mods
-            </Button>
+            <ExportButton
+                path={modsPath}
+                files={files}
+                modinfo={modInfo}
+                modpack={modList}
+            />
 
             <ModGrid
                 files={files}
