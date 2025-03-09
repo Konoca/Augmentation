@@ -12,6 +12,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "fetch-retry": "^6.0.0",
+    "json2toml": "^6.1.1",
     "toml": "^3.0.0"
   }
 }

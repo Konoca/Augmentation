@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, GlobalStyles } from '@mui/material';
+import { Box, GlobalStyles } from '@mui/material';
 
 import CustomTextField from './components/CustomTextField';
 import Mod from './interfaces/mod';
@@ -12,18 +12,22 @@ import ExportButton from './components/UpdateButton';
 
 function App() {
     const [modsPath, setModsPath] = React.useState<string>('');
+
     const [files, setFiles] = React.useState<string[]>([]);
     const [modInfo, setModInfo] = React.useState<ModInfo[]>([]);
+    const [modList, setModList] = React.useState<Mod[]>([]);
+
     const [pathError, setPathError] = React.useState<boolean>(false);
     const [jsonError, setJsonError] = React.useState<boolean>(false);
-    const [modList, setModList] = React.useState<Mod[]>([]);
 
     //const [, forceUpdate] = React.useReducer(x => x + 1, 0);
 
     const handleSetPath = (path: string) => {
         setModsPath(path);
 
-        if (!path.endsWith('.minecraft/mods')) return;
+        if (!path.endsWith('.minecraft/mods') && !path.endsWith('.minecraft/mods/'))
+            return;
+
         fetch('http://localhost:3001/os/files', {
             headers: {'Content-Type': 'application/json'},
             method: 'POST',
