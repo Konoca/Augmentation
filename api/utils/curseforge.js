@@ -50,6 +50,7 @@ const getInfo = async (projectId, filename, modversion, gameversion, loaders) =>
             'x-prismlauncher-loaders': [getModLoaderString(fileIdx.modLoader)],
             'x-prismlauncher-mc-versions': file.gameVersions,
             'x-prismlauncher-release-type': getReleaseString(file.releaseType),
+            slug: data.slug,
 
             download: {
                 hash: file.hashes.find(f => f.algo === 1).value,
