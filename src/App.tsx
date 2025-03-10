@@ -25,9 +25,6 @@ function App() {
     const handleSetPath = (path: string) => {
         setModsPath(path);
 
-        if (!path.endsWith('.minecraft/mods') && !path.endsWith('.minecraft/mods/'))
-            return;
-
         fetch('http://localhost:3001/os/files', {
             headers: {'Content-Type': 'application/json'},
             method: 'POST',
