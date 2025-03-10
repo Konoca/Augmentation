@@ -1,27 +1,24 @@
 const { app, BrowserWindow } = require('electron');
-const path = require('node:path')
+const path = require('node:path');
 
-// TODO
-// https://github.com/miloman23/ReactJS-ElectronJS-ExpressJS-App/
-
-let win;
 function createWindow() {
-    win = new BrowserWindow({
+    const win = new BrowserWindow({
         //width: 800,
         //height: 600,
-        // webPreferences: {
-        //     preload: path.join(__dirname, 'preload.js'),
-        //     nodeIntegration: true,
-        //     sandbox: false
-        // }
+         webPreferences: {
+             preload: path.join(__dirname, 'preload.js'),
+             nodeIntegration: true,
+             sandbox: false
+        },
         frame: false,
         useContentSize: true,
         darkTheme: true,
     });
 
+    //express();
     win.loadURL(
         app.isPackaged
-          ? `file://${path.join(__dirname, '../build/index.html')}`
+          ? `file://${path.join(__dirname, 'index.html')}`
           : 'http://localhost:3000'
       );
 }
