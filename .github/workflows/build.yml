@@ -8,7 +8,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        # os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Check out Git repository
@@ -25,14 +26,10 @@ jobs:
       - name: Build ReactJS
         run: npm run build
 
-      - name: Fix Path issues in Index.html
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "=\"/"
-          replace: "=\""
-
-      - name: Copy API to build
-        run: cp -r api build
+      - name: Fix ReactJS build
+        run: |
+           sed -i 's|=\"/|=\"|g' ./build/index.html
+           cp -r api build
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
