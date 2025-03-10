@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: 22.4.0
 
+      - name: Install Node Modules
+        run: npm ci
+
       - name: Build ReactJS
         run: npm run build
 
