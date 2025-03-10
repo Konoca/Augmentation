@@ -1,5 +1,5 @@
 {
-  "name": "augmentation-ts",
+  "name": "augmentation",
   "version": "0.1.0",
   "private": true,
   "main": "public/electron.js",

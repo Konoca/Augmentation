@@ -19,7 +19,7 @@ interface BtnProps {
 
 function ExportButton(props: BtnProps) {
     const [changes, setChanges] = React.useState<ModStatus[]>([]);
-    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+    //const [, forceUpdate] = React.useReducer(x => x + 1, 0);
 
     const [gameVersions, setGameVersions] = React.useState<string[]>([]);
     const [loaders, setLoaders] = React.useState<string[]>([]);
