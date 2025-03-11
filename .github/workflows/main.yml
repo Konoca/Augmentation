@@ -28,6 +28,8 @@ jobs:
  
       - name: Build App
         run: npm run dist
+        env:
+           GH_TOKEN: ${{ secrets.github_token }}
 
       - name: Release
         uses: softprops/action-gh-release@v2
