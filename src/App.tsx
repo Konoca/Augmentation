@@ -8,7 +8,6 @@ import { CustomSubTitle, CustomTitle } from './components/CustomTypography';
 import { colors } from './constants';
 import ModGrid from './components/ModGrid';
 import ExportButton from './components/UpdateButton';
-//import { changeTheme } from './utils/theme';
 
 function App() {
     const [modsPath, setModsPath] = React.useState<string>('');
@@ -20,55 +19,25 @@ function App() {
     const [pathError, setPathError] = React.useState<boolean>(false);
     const [jsonError, setJsonError] = React.useState<boolean>(false);
 
-    //const [, forceUpdate] = React.useReducer(x => x + 1, 0);
-
     const handleSetPath = (path: string) => {
         setModsPath(path);
 
-        fetch('http://localhost:3001/os/files', {
-            headers: {'Content-Type': 'application/json'},
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify({path: path}),
-        })
-        .then(res => {
-            if (res.status !== 200) {
-                setPathError(true);
-                setFiles([]);
-                throw new Error('Bad Response in handleSetPath() fetch(files)');
-            }
-
-            return res;
-        })
-        .then(res => res.json())
-        .then(files => {
-            setPathError(false);
-            setFiles(files);
-            getModInfo(path, files);
-        })
-        .catch((e) => console.log(e));
+        const files = window.api.os.files(path);
+        setPathError(false);
+        setFiles(files);
+        getModInfo(path, files);
     };
 
     const getModInfo = (path: string, f: string[]) => {
         if (!f.includes('.index')) return;
 
-        fetch('http://localhost:3001/mc/info', {
-            headers: {'Content-Type': 'application/json'},
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify({path: path + '/.index/'}),
-        })
-        .then(res => {
-            if (res.status !== 200) {
-                setPathError(true);
-                setFiles([]);
-                throw new Error('Bad Response in getModInfo() fetch(info)');
-            }
-
-            return res;
-        })
-        .then(res => res.json())
+        window.api.mc.info(path + '/.index/')
         .then((info: ModInfo[]) => setModInfo(info))
+        .catch((err) => {
+            setPathError(true);
+            setFiles([]);
+            console.error('Bad Response in getModInfo():', err);
+        })
     }
 
     const handleSetModList = (rawJson: string) => {
@@ -94,7 +63,7 @@ function App() {
             }}
             />
 
-            <CustomTitle variant='h1' align='center' /* onClick={() => {changeTheme(); forceUpdate();}} */ >
+            <CustomTitle variant='h1' align='center' >
                 Augmentation
             </CustomTitle>
             <CustomSubTitle variant='h5' align='center' gutterBottom>
@@ -125,6 +94,7 @@ function App() {
                 files={files}
                 modinfo={modInfo}
                 modpack={modList}
+                forceUpdate={() => handleSetPath(modsPath)}
             />
 
             <ModGrid

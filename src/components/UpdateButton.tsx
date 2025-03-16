@@ -15,11 +15,11 @@ interface BtnProps {
     files: string[];
     modinfo: ModInfo[];
     modpack: Mod[];
+    forceUpdate: CallableFunction;
 }
 
 function ExportButton(props: BtnProps) {
     const [changes, setChanges] = React.useState<ModStatus[]>([]);
-    //const [, forceUpdate] = React.useReducer(x => x + 1, 0);
 
     const [gameVersions, setGameVersions] = React.useState<string[]>([]);
     const [loaders, setLoaders] = React.useState<string[]>([]);
@@ -50,34 +50,20 @@ function ExportButton(props: BtnProps) {
     }, [props.path, props.files, props.modinfo, props.modpack]);
 
     const handleClick = async () => {
-        changes.forEach(async (change) => {
+        Promise.all(changes.map(async (change) => {
             const toml = props.modinfo.find((mod) => change.name === mod.filename);
             if (change.toRemove) {
-                await fetch('http://localhost:3001/os/delete', {
-                    headers: {'Content-Type': 'application/json'},
-                    method: 'POST',
-                    mode: 'cors',
-                    body: JSON.stringify({path: props.path, filename: change.name, tomlname: toml?.toml}),
-                });
+                await window.api.os.delete(props.path, change.name, toml?.toml)
+                .then(() => Promise.resolve());
             }
 
             if (change.toAdd) {
                 const mod = props.modpack.find((mod) => change.name === mod.filename);
-
-                fetch('http://localhost:3001/os/download', {
-                    headers: {'Content-Type': 'application/json'},
-                    method: 'POST',
-                    mode: 'cors',
-                    body: JSON.stringify({
-                        path: props.path,
-                        modinfo: mod,
-                        gameversion: gameVersions,
-                        loaders: loaders,
-                    }),
-                });
+                await window.api.os.download(props.path, mod, gameVersions, loaders)
+                .then(() => Promise.resolve());
             }
-        });
-        //forceUpdate();
+        }))
+        .then(() => props.forceUpdate());
     }
 
     return (
