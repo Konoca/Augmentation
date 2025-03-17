@@ -22,7 +22,7 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt update
-          sudo apt install -y wine64 wine32
+          sudo apt install -y wine64 wine32 wine
 
       - name: Install Node Modules
         run: npm ci
