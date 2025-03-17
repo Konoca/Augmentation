@@ -1,8 +1,9 @@
 {
   "name": "augmentation",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "main": "public/electron.js",
+  "homepage": ".",
   "dependencies": {
     "@catppuccin/palette": "^1.7.1",
     "@emotion/react": "^11.14.0",
@@ -35,7 +36,7 @@
     "package:win": "electron-builder -w",
     "package:wl": "electron-builder -wl",
     "electron": "concurrently \"cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .\"",
-    "dist": "react-scripts build ; sed -i 's|=\"/|=\"|g' ./build/index.html ; cp -r api build ; npm run package:wl",
+    "dist": "react-scripts build ; npm run package:wl",
     "clean": "rm -rf ./build ./dist"
   },
   "eslintConfig": {
