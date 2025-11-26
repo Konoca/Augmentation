@@ -1,9 +1,6 @@
 package com.konoca.frames;
 
 import java.awt.BorderLayout;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -82,6 +79,8 @@ public class ImportDialog extends JDialog
         deleteMods.removeAll(aug.mods);
 
         Path modsPath = OSUtils.getModsPath(instancePath);
+        OSUtils.createDirectories(modsPath.resolve(".index"));
+
         deleteMods.forEach(mod -> {
             this.label.setText("Deleting " + mod.name);
             String filename = mod.enabled ? mod.filename : mod.filename + ".disabled";
@@ -119,6 +118,12 @@ public class ImportDialog extends JDialog
                 Path path = modsPath.resolve(mod.filename);
                 Path newPath = modsPath.resolve(mod.filename + ".disabled");
 
+                if (!OSUtils.pathExists(path))
+                {
+                    logger.info("Jar file does not exist, skipping");
+                    return;
+                }
+
                 OSUtils.moveFile(path, newPath);
                 return;
             }
@@ -130,6 +135,12 @@ public class ImportDialog extends JDialog
 
                 Path path = modsPath.resolve(mod.filename + ".disabled");
                 Path newPath = modsPath.resolve(mod.filename);
+
+                if (!OSUtils.pathExists(path))
+                {
+                    logger.info("Disabled file does not exist, skipping");
+                    return;
+                }
 
                 OSUtils.moveFile(path, newPath);
                 return;

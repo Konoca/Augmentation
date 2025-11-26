@@ -60,6 +60,11 @@ public class MainFrame extends JFrame
         this.actionPanel.enable();
     }
 
+    public void reload()
+    {
+        this.tablePanel.reloadData(this.instancePath);
+    }
+
     public Path getInstancePath()
     {
         return this.instancePath;
