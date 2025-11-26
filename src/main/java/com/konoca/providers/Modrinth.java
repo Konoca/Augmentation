@@ -40,7 +40,8 @@ public class Modrinth extends Provider
 
     public void download(Path instancePath, String mode, String URL)
     {
-        URLObj obj = new URLObj(URL, ".minecraft/mods", false);
+        String mcDir = OSUtils.getMCdir(instancePath);
+        URLObj obj = new URLObj(URL, mcDir + "/mods", false);
         logger.info("Downloading from " + obj.getURL());
         logger.info("Downloading to " + obj.getAbsPath(instancePath));
 

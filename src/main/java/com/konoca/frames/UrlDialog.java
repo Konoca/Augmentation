@@ -13,13 +13,14 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import com.konoca.objs.URLObj;
+import com.konoca.utils.OSUtils;
 
 public class UrlDialog extends JDialog
 {
     private static Logger logger = Logger.getLogger(UrlDialog.class.getName());
 
     public static final String[] cols = {"URL", "Path from Instance", "Is ZIP"};
-    public static final Object[] defaultRow = {"https://download.url", ".minecraft/", "Y"};
+    private Object[] defaultRow = {"https://download.url", "", "Y"};
 
     private JTable table;
     private JScrollPane scrollPane;
@@ -31,7 +32,7 @@ public class UrlDialog extends JDialog
 
     private DefaultTableModel model;
 
-    public UrlDialog(JFrame parent, DefaultTableModel model)
+    public UrlDialog(MainFrame parent, DefaultTableModel model)
     {
         logger.info("Initializing");
         this.model = model;
@@ -42,6 +43,9 @@ public class UrlDialog extends JDialog
         this.setSize(500, 400);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setModal(true);
+
+        String mcDir = OSUtils.getMCdir(parent.getInstancePath());
+        this.defaultRow[1] = mcDir + "/";
 
         this.table = new JTable(model);
         this.scrollPane = new JScrollPane(this.table);
@@ -66,7 +70,7 @@ public class UrlDialog extends JDialog
         this.setVisible(true);
     }
 
-    public static ArrayList<URLObj> create(JFrame parent, ArrayList<URLObj> startingURLs)
+    public static ArrayList<URLObj> create(MainFrame parent, ArrayList<URLObj> startingURLs)
     {
         Object[][] rows = new Object[startingURLs.size()][];
         for (int i = 0; i < startingURLs.size(); i++) {

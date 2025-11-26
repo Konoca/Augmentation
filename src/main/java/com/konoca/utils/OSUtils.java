@@ -45,11 +45,27 @@ public class OSUtils
         return Files.exists(path);
     }
 
-    public static boolean constainsDotMC(String pathString)
+    public static String getMCdir(String pathString)
     {
         Path path = OSUtils.getPath(pathString);
-        path = path.resolve(".minecraft");
-        return pathExists(path);
+        return getMCdir(path);
+    }
+
+    public static String getMCdir(Path instancePath)
+    {
+        Path dotMC = instancePath.resolve(".minecraft");
+        if (pathExists(dotMC)) return ".minecraft";
+
+        Path MC = instancePath.resolve("minecraft");
+        if (pathExists(MC)) return "minecraft";
+
+        logger.severe("No minecraft folder was found");
+        return null;
+    }
+    public static Path getModsPath(Path instancePath)
+    {
+        String mcDir = getMCdir(instancePath);
+        return instancePath.resolve(mcDir, "mods");
     }
 
     public static JSONObject getJSON(Path path)

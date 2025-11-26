@@ -7,7 +7,6 @@ import com.konoca.frames.panels.ActionPanel;
 import com.konoca.frames.panels.InputPanel;
 import com.konoca.frames.panels.TablePanel;
 import com.konoca.objs.Augment;
-import com.konoca.objs.ModObj;
 import com.konoca.objs.URLObj;
 import com.konoca.utils.OSUtils;
 import com.konoca.utils.PrismUtils;
@@ -16,8 +15,6 @@ import java.awt.BorderLayout;
 import java.nio.file.Path;
 
 import javax.swing.JFrame;
-
-import org.tomlj.TomlParseResult;
 
 public class MainFrame extends JFrame
 {
