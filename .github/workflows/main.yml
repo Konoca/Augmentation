@@ -1,9 +1,6 @@
 name: Build/release
 
-on:
-  push:
-    tags:
-      - 'v*.*.*'
+on: push
 
 jobs:
   release:
@@ -13,30 +10,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
+      - name: Set up JDK 24 for x64
+        uses: actions/setup-java@v4
         with:
-          node-version: 22.4.0
+          java-version: '24'
+          distribution: 'temurin'
+          architecture: x64
 
-      - name: Install Wine
+      - name: Build App (Maven)
         run: |
-          sudo dpkg --add-architecture i386
-          sudo apt update
-          sudo apt install -y wine64 wine32 wine
+          sudo chmod +x build.sh
+          ./build.sh
 
-      - name: Install Node Modules
-        run: npm ci
-
-      - name: Get current version from package.json
-        id: get_version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-
-      - name: Build App
-        run: npm run dist
-
-      - name: Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          files: |
-            dist/augmentation-${{ env.VERSION }}.AppImage
-            dist/augmentation\ Setup\ ${{ env.VERSION }}.exe
+          files: augmentation.jar
