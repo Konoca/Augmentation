@@ -81,7 +81,7 @@ public class ImportDialog extends JDialog
         ArrayList<ModObj> deleteMods = new ArrayList<>(currAug.mods);
         deleteMods.removeAll(aug.mods);
 
-        Path modsPath = instancePath.resolve(".minecraft", "mods");
+        Path modsPath = OSUtils.getModsPath(instancePath);
         deleteMods.forEach(mod -> {
             this.label.setText("Deleting " + mod.name);
             String filename = mod.enabled ? mod.filename : mod.filename + ".disabled";

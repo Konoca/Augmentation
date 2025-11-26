@@ -91,7 +91,8 @@ public class InputPanel extends JPanel
             return;
         }
 
-        boolean isValid = OSUtils.constainsDotMC(path);
+        String mcDir = OSUtils.getMCdir(path);
+        boolean isValid = mcDir != null;
         logger.info("IsValid: " + isValid);
 
         if (!isValid)

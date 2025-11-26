@@ -67,7 +67,8 @@ public class Curseforge extends Provider
             String downloadUrl = (String) dataObj.get("downloadUrl");
             logger.info("Got URL: " + downloadUrl);
 
-            URLObj obj = new URLObj(downloadUrl, ".minecraft/mods", false);
+            String mcDir = OSUtils.getMCdir(instancePath);
+            URLObj obj = new URLObj(downloadUrl, mcDir + "/mods", false);
             logger.info("Downloading from " + obj.getURL());
             logger.info("Downloading to " + obj.getAbsPath(instancePath));
 

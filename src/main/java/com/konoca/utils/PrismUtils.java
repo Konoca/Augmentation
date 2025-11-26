@@ -56,7 +56,8 @@ public class PrismUtils
         logger.info("start");
         ArrayList<ModObj> tomls = new ArrayList<>();
 
-        Path path = instancePath.resolve(".minecraft", "mods", ".index");
+        Path modsPath = OSUtils.getModsPath(instancePath);
+        Path path = modsPath.resolve(".index");
         logger.info("Using: " + path.toString());
 
         if (!OSUtils.pathExists(path))
@@ -85,7 +86,8 @@ public class PrismUtils
 
     public static boolean isModEnabled(Path instancePath, String modFileName)
     {
-        Path path = instancePath.resolve(".minecraft", "mods", modFileName);
+        Path modsPath = OSUtils.getModsPath(instancePath);
+        Path path = modsPath.resolve(modFileName);
         return OSUtils.pathExists(path); // mod is enabled if file exists, disabled = modFileName.disabled
     }
 }

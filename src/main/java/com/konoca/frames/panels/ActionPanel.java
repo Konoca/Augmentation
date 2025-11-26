@@ -24,9 +24,6 @@ public class ActionPanel extends JPanel
 {
     private static Logger logger = Logger.getLogger(ActionPanel.class.getName());
 
-    private static final String[] URL_cols = {"URL", "Path from Instance", "Is ZIP"};
-    private static final Object[] URL_defaultRow = {"https://download.url", ".minecraft/", "Y"};
-
     private MainFrame parent;
     private JButton exportBtn;
     private JButton importBtn;
