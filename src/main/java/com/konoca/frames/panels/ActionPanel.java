@@ -144,5 +144,7 @@ public class ActionPanel extends JPanel
         }
 
         new ImportDialog(this.parent, aug);
+
+        this.parent.reload();
     }
 }

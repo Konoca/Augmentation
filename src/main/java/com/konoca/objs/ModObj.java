@@ -164,22 +164,33 @@ public class ModObj
     {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("filename = '" + this.filename + "'\n");
-        sb.append("name = '" + this.name + "'\n");
-        sb.append("side = '" + this.side + "'\n");
+        _tomlAppend(sb, "filename", this.filename);
+        _tomlAppend(sb, "name", this.name);
+        _tomlAppend(sb, "side", this.side);
         sb.append("x-prismlauncher-loaders = " + stringToArrayFormat(this.loaders) + "\n");
         sb.append("x-prismlauncher-mc-versions = " + stringToArrayFormat(this.mcversions) + "\n");
-        sb.append("x-prismlauncher-release-type = '" + this.releaseType + "'\n\n");
+        _tomlAppend(sb, "x-prismlauncher-release-type", this.releaseType);
+        sb.append("\n");
 
         sb.append("[download]\n");
-        sb.append("hash = '" + this.hash + "'\n");
-        sb.append("hash-format = '" + this.hashFormat + "'\n");
-        sb.append("mode = '" + this.mode + "'\n");
-        sb.append("url = '" + this.downloadUrl + "'\n\n");
+        _tomlAppend(sb, "hash", this.hash);
+        _tomlAppend(sb, "hash-format", this.hashFormat);
+        _tomlAppend(sb, "mode", this.mode);
+        _tomlAppend(sb, "url", this.downloadUrl);
+        sb.append("\n");
 
         sb.append(this.provider.getTOML());
 
         return sb.toString();
+    }
+
+    private void _tomlAppend(StringBuilder sb, String key, String value)
+    {
+        String quote = "'";
+        if (value.contains(quote)) quote = "\"";
+
+        String str = String.format("%s = %s%s%s\n", key, quote, value, quote);
+        sb.append(str);
     }
 
     public void download(Path instancePath)

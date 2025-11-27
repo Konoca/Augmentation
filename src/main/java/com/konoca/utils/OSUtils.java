@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -95,13 +97,25 @@ public class OSUtils
         return result;
     }
 
-    public static boolean writeFile(String path, String content)
+    public static boolean writeFile(String pathStr, String content)
     {
-        try (FileWriter writer = new FileWriter(path)) {
+        try (FileWriter writer = new FileWriter(pathStr)) {
             writer.write(content);
             return true;
         } catch (Exception e) {
-            logger.severe("Error writing file " + path);
+            logger.severe("Error writing file " + pathStr);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean createDirectories(Path path)
+    {
+        try {
+            Files.createDirectories(path);
+            return true;
+        } catch (Exception e) {
+            logger.severe("Error creating directories " + path.toString());
             e.printStackTrace();
             return false;
         }
@@ -127,7 +141,7 @@ public class OSUtils
             URI uri = new URI(urlObj.getURL());
             URL url = uri.toURL();
 
-            String outputName = Paths.get(url.getPath()).getFileName().toString();
+            String outputName = URLDecoder.decode(Paths.get(url.getPath()).getFileName().toString(), "UTF-8");
             Path outputPath = absPath.resolve(outputName);
             Files.createDirectories(absPath);
 
