@@ -18,12 +18,10 @@ jobs:
           architecture: x64
 
       - name: Build App (Maven)
-        run: |
-          sudo chmod +x build.sh
-          ./build.sh
+        run: mvn clean package
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: augmentation.jar
+          files: augmentation*.jar
