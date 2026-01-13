@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
@@ -14,16 +13,15 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import com.konoca.frames.MainFrame;
 import com.konoca.objs.ModObj;
+import com.konoca.objs.VersionObj;
 import com.konoca.utils.PrismUtils;
 
-public class TablePanel extends JPanel
+public class ModsTable extends JPanel
 {
     private static Logger logger = Logger.getLogger(InputPanel.class.getName());
     private static String[] modColumns = {"Enabled", "Mod Name", "Mod Version", "Provider", "Loaders", "MC Versions"};
 
-    private MainFrame parent;
 
     private JTable modTable;
     private JScrollPane modScrollPane;
@@ -31,9 +29,8 @@ public class TablePanel extends JPanel
     private JTable versionTable;
     private JScrollPane versionSP;
 
-    public TablePanel(MainFrame parent)
+    public ModsTable()
     {
-        this.parent = parent;
         this.setLayout(new BorderLayout());
 
         this.addVersionsTable();
@@ -62,11 +59,21 @@ public class TablePanel extends JPanel
 
     private void addModTable()
     {
-        String[][] data = {{"", "", "", "", "", ""}};
+        Object[][] data = {{"", "", "", "", "", ""}};
 
         this.modTable = new JTable(data, modColumns);
         this.modTable.setDefaultEditor(Object.class, null);
         this.modScrollPane = new JScrollPane(this.modTable);
+
+        // this.modTable.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+        //     @Override
+        //     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        //         if (value instanceof String) return null;
+        //         JCheckBox cbx = new JCheckBox();
+        //         cbx.setSelected((Boolean) value);
+        //         return cbx;
+        //     }
+        // });
 
         this.add(this.modScrollPane, BorderLayout.CENTER);
     }
@@ -79,11 +86,18 @@ public class TablePanel extends JPanel
 
     private void reloadVersionsTable(Path instancePath)
     {
-        Map<String, String> versions = PrismUtils.getVersionInfo(instancePath);
-        Object[] columns = versions.keySet().toArray();
-        Object[][] data = {versions.values().toArray()};
+        ArrayList<VersionObj> versions = PrismUtils.getVersionInfo(instancePath);
+        ArrayList<String> columns = new ArrayList<>();
+        ArrayList<String> rows = new ArrayList<>();
 
-        DefaultTableModel model = new DefaultTableModel(data, columns);
+        versions.forEach((VersionObj v) -> {
+            columns.add(v.getName());
+            rows.add(v.getValue());
+        });
+
+        Object[][] data = { rows.toArray() };
+
+        DefaultTableModel model = new DefaultTableModel(data, columns.toArray());
         this.versionTable.setModel(model);
     }
 
@@ -91,10 +105,11 @@ public class TablePanel extends JPanel
     {
         ArrayList<ModObj> mods = PrismUtils.getModInfo(instancePath);
 
-        ArrayList<String[]> data = new ArrayList<>();
+        ArrayList<Object[]> data = new ArrayList<>();
         mods.forEach((ModObj mod) -> {
-            String[] row = {
+            Object[] row = {
                 mod.getIsEnabled(),
+                // mod.enabled,
                 mod.name,
                 mod.provider.getVersionID(),
                 mod.provider.getName(),

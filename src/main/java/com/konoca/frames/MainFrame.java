@@ -3,15 +3,10 @@ package com.konoca.frames;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import com.konoca.Constants;
-import com.konoca.frames.panels.ActionPanel;
-import com.konoca.frames.panels.InputPanel;
-import com.konoca.frames.panels.TablePanel;
 import com.konoca.objs.Augment;
 import com.konoca.objs.URLObj;
-import com.konoca.utils.OSUtils;
 import com.konoca.utils.PrismUtils;
 
-import java.awt.BorderLayout;
 import java.nio.file.Path;
 
 import javax.swing.JFrame;
@@ -19,13 +14,6 @@ import javax.swing.JFrame;
 public class MainFrame extends JFrame
 {
     private static Logger logger = Logger.getLogger(MainFrame.class.getName());
-
-    private InputPanel inputPanel;
-    private TablePanel tablePanel;
-    private ActionPanel actionPanel;
-
-    private Path instancePath;
-    private ArrayList<URLObj> urls;
 
     public MainFrame()
     {
@@ -35,55 +23,28 @@ public class MainFrame extends JFrame
         this.setSize(Constants.WindowWidth, Constants.WindowHeight);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        this.urls = new ArrayList<>();
-
-        this.inputPanel = new InputPanel(this);
-        this.add(this.inputPanel, BorderLayout.NORTH);
-        this.tablePanel = new TablePanel(this);
-        this.add(this.tablePanel, BorderLayout.CENTER);
-        this.actionPanel = new ActionPanel(this);
-        this.add(this.actionPanel, BorderLayout.SOUTH);
-
-        this.pack();
-        this.setVisible(true);
+        drawPrismFrame();
+        // drawInstanceFrame(null);
     }
 
-    public void setInstancePath(String pathString)
+    public void drawPrismFrame()
     {
-        Path path = OSUtils.getPath(pathString);
-        this.setInstancePath(path);
+        logger.info("Drawing Prism Frame");
+        new PrismFrame(this);
     }
-    public void setInstancePath(Path path)
+    public void drawInstanceFrame(String instancePath)
     {
-        this.instancePath = path;
-        this.tablePanel.reloadData(path);
-        this.actionPanel.enable();
+        logger.info("Drawing Instance Frame : " + instancePath);
+        new InstanceFrame(this, instancePath);
     }
 
-    public void reload()
-    {
-        this.tablePanel.reloadData(this.instancePath);
-    }
-
-    public Path getInstancePath()
-    {
-        return this.instancePath;
-    }
-
-    public void setURLs(ArrayList<URLObj> urls)
-    {
-        this.urls = urls;
-    }
-    public ArrayList<URLObj> getURLs()
-    {
-        return this.urls;
-    }
-
-    public Augment getAugment()
+    public Augment getAugment(Path instancePath, ArrayList<URLObj> urls)
     {
         Augment aug = new Augment();
-        aug.urls = this.urls;
-        aug.mods = PrismUtils.getModInfo(this.instancePath);
+        aug.versions = PrismUtils.getVersionInfo(instancePath);
+        aug.urls = urls;
+        aug.mods = PrismUtils.getModInfo(instancePath);
+        aug.mmcPackJson = PrismUtils.getVersionFile(instancePath);
 
         logger.info("-- Augment --");
         logger.info(aug.toString());

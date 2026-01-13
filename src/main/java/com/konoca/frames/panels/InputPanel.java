@@ -4,6 +4,7 @@ import com.konoca.Constants;
 import com.konoca.frames.MainFrame;
 import com.konoca.utils.OSUtils;
 
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import java.awt.Dimension;
@@ -18,29 +19,44 @@ import javax.swing.JTextField;
 public class InputPanel extends JPanel
 {
     private static Logger logger = Logger.getLogger(InputPanel.class.getName());
-    private static String placeholderTxt = "Path/To/Instance";
 
     private MainFrame parent;
     private JTextField textField;
     private JButton browseBtn;
     private JButton searchBtn;
 
-    public InputPanel(MainFrame parent)
+    private String errorMsg;
+    private Predicate<String> searchValidation;
+    private Predicate<String> postSearch;
+
+    public InputPanel(
+            MainFrame parent,
+            String placeholderTxt, String errorMsg,
+            Predicate<String> searchValidation,
+            Predicate<String> postSearch
+        )
     {
         this.parent = parent;
+        this.errorMsg = errorMsg;
+        this.searchValidation = searchValidation;
+        this.postSearch = postSearch;
 
-        this.addPathTextField();
+        this.addPathTextField(placeholderTxt);
         this.addBrowseBtn();
         this.addSearchBtn();
     }
 
-    private void addPathTextField()
+    private void addPathTextField(String placeholderTxt)
     {
         this.textField = new JTextField(placeholderTxt);
         Dimension size = new Dimension(Constants.WindowWidth / 2, 25);
 
         this.textField.setPreferredSize(size);
         this.add(this.textField);
+    }
+    public void setTextFieldText(String text)
+    {
+        this.textField.setText(text);
     }
 
     private void addBrowseBtn()
@@ -91,24 +107,22 @@ public class InputPanel extends JPanel
             return;
         }
 
-        String mcDir = OSUtils.getMCdir(path);
-        boolean isValid = mcDir != null;
+        boolean isValid = this.searchValidation.test(path);
         logger.info("IsValid: " + isValid);
-
         if (!isValid)
         {
             errorPopup();
             return;
         }
 
-        this.parent.setInstancePath(path);
+        this.postSearch.test(path);
     }
 
     private void errorPopup()
     {
         JOptionPane.showMessageDialog(
             this.parent,
-            "Please select a valid Prism Instance folder",
+            this.errorMsg,
             "Invalid path",
             JOptionPane.ERROR_MESSAGE
         );

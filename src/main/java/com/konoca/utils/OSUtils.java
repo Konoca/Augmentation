@@ -1,5 +1,7 @@
 package com.konoca.utils;
 
+import java.util.ArrayList;
+import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -21,7 +23,6 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,16 +51,27 @@ public class OSUtils
     public static String getMCdir(String pathString)
     {
         Path path = OSUtils.getPath(pathString);
-        return getMCdir(path);
+        return getMCdir(path, false);
+    }
+    public static String getMCdir(String pathString, boolean isNullOk)
+    {
+        Path path = OSUtils.getPath(pathString);
+        return getMCdir(path, isNullOk);
     }
 
     public static String getMCdir(Path instancePath)
+    {
+        return OSUtils.getMCdir(instancePath, false);
+    }
+    public static String getMCdir(Path instancePath, boolean isNullOk)
     {
         Path dotMC = instancePath.resolve(".minecraft");
         if (pathExists(dotMC)) return ".minecraft";
 
         Path MC = instancePath.resolve("minecraft");
         if (pathExists(MC)) return "minecraft";
+
+        if (isNullOk) return "minecraft"; // default directory to create
 
         logger.severe("No minecraft folder was found");
         return null;
@@ -210,6 +222,70 @@ public class OSUtils
             logger.severe("Error moving " + src.toString() + " -> " + dst.toString());
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static String getSetting(String name)
+    {
+        try {
+            String userHome = System.getProperty("user.home");
+
+            Path augDir = Paths.get(userHome, ".augmentation");
+            if (!OSUtils.pathExists(augDir)) OSUtils.createDirectories(augDir);
+
+            Path settingsFile = augDir.resolve("config.properties");
+            if (!OSUtils.pathExists(settingsFile)) OSUtils.writeFile(settingsFile.toString(), "");
+
+            Properties p = new Properties();
+            p.load(new FileInputStream(settingsFile.toString()));
+
+            return p.getProperty(name, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static boolean setSetting(String name, String value)
+    {
+        try {
+            String userHome = System.getProperty("user.home");
+
+            Path augDir = Paths.get(userHome, ".augmentation");
+            if (!OSUtils.pathExists(augDir)) OSUtils.createDirectories(augDir);
+
+            Path settingsFile = augDir.resolve("config.properties");
+            if (!OSUtils.pathExists(settingsFile)) OSUtils.writeFile(settingsFile.toString(), "");
+
+            Properties p = new Properties();
+            p.load(new FileInputStream(settingsFile.toString()));
+
+            p.setProperty(name, value);
+            p.store(new FileWriter(settingsFile.toString()), "");
+
+            logger.info("Setting Key="+name+" Value="+value);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static ArrayList<File> getAllInstances(Path prismPath)
+    {
+        try {
+            File[] files = prismPath.toFile().listFiles();
+            ArrayList<File> instances = new ArrayList<>();
+            for (File file : files)
+            {
+                if (!file.isDirectory()) continue;
+                if (!OSUtils.pathExists(file.toPath().resolve("instance.cfg"))) continue;
+                instances.add(file);
+            }
+
+            return instances;
+        } catch (Exception e) {
+            return null;
         }
     }
 }

@@ -4,27 +4,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.tomlj.TomlParseResult;
 
 import com.konoca.objs.ModObj;
+import com.konoca.objs.VersionObj;
 
 public class PrismUtils
 {
     private static Logger logger = Logger.getLogger(PrismUtils.class.getName());
-    private static String versionsFile = "mmc-pack.json";
+    public static String versionsFile = "mmc-pack.json";
+    public static String instanceCfgFile = "instance.cfg";
 
-    public static HashMap<String, String> getVersionInfo(Path instancePath)
+    public static ArrayList<VersionObj> getVersionInfo(Path instancePath)
     {
         logger.info("start");
-        HashMap<String, String> map = new HashMap<>();
+        ArrayList<VersionObj> versions = new ArrayList<>();
 
         Path path = instancePath.resolve(versionsFile);
         logger.info("Using: " + path.toString());
@@ -32,7 +34,7 @@ public class PrismUtils
         if (!OSUtils.pathExists(path))
         {
             logger.severe("Version file does not exist");
-            return map;
+            return versions;
         }
 
         JSONObject json = OSUtils.getJSON(path);
@@ -44,11 +46,27 @@ public class PrismUtils
             JSONObject obj = (JSONObject) itr.next();
             String name = (String) obj.get("cachedName");
             String version = (String) obj.get("version");
-            map.put(name, version);
+            versions.add(new VersionObj(name, version));
         }
 
-        logger.info("Got: " + map.toString());
-        return map;
+        logger.info("Got: " + versions.toString());
+        return versions;
+    }
+    public static String getVersionFile(Path instancePath)
+    {
+        logger.info("start");
+
+        Path path = instancePath.resolve(versionsFile);
+        logger.info("Using: " + path.toString());
+
+        if (!OSUtils.pathExists(path))
+        {
+            logger.severe("Version file does not exist");
+            return "";
+        }
+
+        JSONObject json = OSUtils.getJSON(path);
+        return json.toJSONString();
     }
 
     public static ArrayList<ModObj> getModInfo(Path instancePath)
@@ -89,5 +107,20 @@ public class PrismUtils
         Path modsPath = OSUtils.getModsPath(instancePath);
         Path path = modsPath.resolve(modFileName);
         return OSUtils.pathExists(path); // mod is enabled if file exists, disabled = modFileName.disabled
+    }
+
+    public static Pattern instanceNameP = Pattern.compile("\nname=.*\n");
+    public static String getInstanceName(String instancePath)
+    {
+        Path path = OSUtils.getPath(instancePath);
+        String instanceCfg = OSUtils.readFile(path.resolve(PrismUtils.instanceCfgFile).toString());
+        Matcher m = PrismUtils.instanceNameP.matcher(instanceCfg);
+
+        while (m.find())
+        {
+            return instanceCfg.substring(m.start()+6, m.end());
+        }
+
+        return "";
     }
 }
