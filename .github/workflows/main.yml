@@ -18,7 +18,9 @@ jobs:
           architecture: x64
 
       - name: Build App (Maven)
-        run: mvn clean package
+        run: |
+          sudo chmod +x build.sh
+          ./build.sh
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
