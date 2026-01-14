@@ -4,41 +4,47 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import java.io.File;
-import java.lang.reflect.Array;
+import java.nio.file.Path;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.table.DefaultTableModel;
 
-import com.konoca.frames.UrlDialog;
-import com.konoca.frames.ImportDialog;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import com.konoca.frames.dialogs.UrlDialog;
+import com.konoca.frames.dialogs.ImportDialog;
+import com.konoca.frames.FrameFuncs;
+import com.konoca.frames.InstanceFrame;
 import com.konoca.frames.MainFrame;
+import com.konoca.frames.PrismFrame;
 import com.konoca.objs.Augment;
 import com.konoca.objs.URLObj;
 import com.konoca.utils.AugUtils;
 import com.konoca.utils.OSUtils;
+import com.konoca.utils.PrismUtils;
 
 public class ActionPanel extends JPanel
 {
     private static Logger logger = Logger.getLogger(ActionPanel.class.getName());
 
     private MainFrame parent;
+    private FrameFuncs funcs;
+
     private JButton exportBtn;
     private JButton importBtn;
     private JButton urlsBtn;
+    private JButton refreshBtn;
 
-    public ActionPanel(MainFrame parent)
+    public ActionPanel(MainFrame parent, FrameFuncs funcs)
     {
         this.parent = parent;
-
-        this.addUrlsBtn();
-        this.addExportBtn();
-        this.addImportBtn();
+        this.funcs = funcs;
     }
 
-    private void addExportBtn()
+    public void addExportBtn()
     {
         this.exportBtn = new JButton("Export");
         this.exportBtn.addActionListener(e -> handleExport());
@@ -46,7 +52,7 @@ public class ActionPanel extends JPanel
         this.add(this.exportBtn);
     }
 
-    private void addImportBtn()
+    public void addImportBtn()
     {
         this.importBtn = new JButton("Import");
         this.importBtn.addActionListener(e -> handleImport());
@@ -54,7 +60,7 @@ public class ActionPanel extends JPanel
         this.add(this.importBtn);
     }
 
-    private void addUrlsBtn()
+    public void addUrlsBtn()
     {
         this.urlsBtn = new JButton("Add URLs");
         this.urlsBtn.addActionListener(e -> handleURLs());
@@ -62,11 +68,33 @@ public class ActionPanel extends JPanel
         this.add(this.urlsBtn);
     }
 
+    public void addRefreshBtn()
+    {
+        this.refreshBtn = new JButton("Refresh");
+        this.refreshBtn.addActionListener(e -> this.funcs.reload());
+        this.refreshBtn.setEnabled(false);
+        this.add(this.refreshBtn);
+    }
+
+    public void addTestBtn()
+    {
+        JButton testBtn = new JButton("Test");
+        testBtn.addActionListener(e -> this.parent.drawInstanceFrame(null));
+        this.add(testBtn);
+    }
+    public void addBackBtn()
+    {
+        JButton backBtn = new JButton("Back to All Instances");
+        backBtn.addActionListener(e -> this.parent.drawPrismFrame());
+        this.add(backBtn);
+    }
+
     public void enable()
     {
-        this.exportBtn.setEnabled(true);
-        this.importBtn.setEnabled(true);
-        this.urlsBtn.setEnabled(true);
+        if (this.exportBtn != null) this.exportBtn.setEnabled(true);
+        if (this.importBtn != null) this.importBtn.setEnabled(true);
+        if (this.urlsBtn != null) this.urlsBtn.setEnabled(true);
+        if (this.refreshBtn != null) this.refreshBtn.setEnabled(true);
     }
 
     private void errorPopup(String msg)
@@ -82,16 +110,22 @@ public class ActionPanel extends JPanel
     private void handleURLs()
     {
         logger.info("URLs pressed");
-        ArrayList<URLObj> urls = UrlDialog.create(this.parent, this.parent.getURLs());
-        this.parent.setURLs(urls);
+        InstanceFrame inst = (InstanceFrame) this.funcs;
+
+        ArrayList<URLObj> urls = UrlDialog.create(
+            this.parent, this.funcs.getURLs(),
+            inst.getInstancePath().toString()
+        );
+        this.funcs.setURLs(urls);
     }
 
     private void handleExport()
     {
         logger.info("Export pressed");
-        JFileChooser fc = new JFileChooser();
+        InstanceFrame inst = (InstanceFrame) this.funcs;
 
-        String filename = AugUtils.getNewFilename(this.parent.getInstancePath());
+        JFileChooser fc = new JFileChooser();
+        String filename = AugUtils.getNewFilename(inst.getInstancePath());
         fc.setSelectedFile(new File(filename));
 
         int option = fc.showSaveDialog(this.parent);
@@ -108,7 +142,7 @@ public class ActionPanel extends JPanel
         if (!path.endsWith(AugUtils.fileExt))
             path = path + AugUtils.fileExt;
 
-        Augment aug = this.parent.getAugment();
+        Augment aug = this.funcs.getAugment();
         OSUtils.writeFile(path, aug.toString());
     }
 
@@ -134,17 +168,49 @@ public class ActionPanel extends JPanel
         }
 
         String rawFile = OSUtils.readFile(path);
-        Augment aug = Augment.fromString(rawFile);
+        Augment augToImport = Augment.fromString(rawFile);
 
-        if (aug == null)
+        if (augToImport == null)
         {
-            errorPopup("Bad version");
-            logger.severe("Bad file selected");
+            errorPopup("Bad version of Augment file, please use a new one");
+            logger.severe("Bad file selected: Augment versions do not match");
             return;
         }
 
-        new ImportDialog(this.parent, aug);
+        Augment currAug = this.funcs.getAugment();
+        Path instancePath = null;
+        if (this.funcs instanceof InstanceFrame)
+        {
+            if (!augToImport.versions.equals(currAug.versions))
+            {
+               errorPopup("Versions do not match");
+               logger.severe("Bad file selected: Loaders do not match");
+               return;
+            }
+            instancePath = ((InstanceFrame) this.funcs).getInstancePath();
+        }
 
-        this.parent.reload();
+        if (this.funcs instanceof PrismFrame)
+        {
+            String filename = file.getName().substring(0, file.getName().length() - AugUtils.fileExt.length());
+
+            // Create Empty Directory
+            instancePath = ((PrismFrame) this.funcs).getPrismPath();
+            instancePath = instancePath.resolve(filename);
+            OSUtils.createDirectories(instancePath);
+
+            // Create mmc-pack.json from Augment file being imported
+            String mmcPackStr = augToImport.mmcPackJson;
+            Path mmcPackPath = instancePath.resolve(PrismUtils.versionsFile);
+            OSUtils.writeFile(mmcPackPath.toString(), mmcPackStr + "\n");
+
+            // Create instance.cfg
+            Path instanceCfgPath = instancePath.resolve(PrismUtils.instanceCfgFile);
+            OSUtils.writeFile(instanceCfgPath.toString(), "[General]\nConfigVersion=1.2\nInstanceType=OneSix\niconKey=default\nname=" + filename + "\n");
+        }
+
+        new ImportDialog(this.parent, augToImport, currAug, instancePath);
+
+        this.funcs.reload();
     }
 }

@@ -1,4 +1,4 @@
-package com.konoca.frames;
+package com.konoca.frames.dialogs;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import com.konoca.frames.MainFrame;
 import com.konoca.objs.URLObj;
 import com.konoca.utils.OSUtils;
 
@@ -20,7 +21,7 @@ public class UrlDialog extends JDialog
     private static Logger logger = Logger.getLogger(UrlDialog.class.getName());
 
     public static final String[] cols = {"URL", "Path from Instance", "Is ZIP"};
-    private Object[] defaultRow = {"https://download.url", "", "Y"};
+    private Object[] defaultRow = {"https://download.url", "", "Y"}; // TODO replace IsZip with checkbox
 
     private JTable table;
     private JScrollPane scrollPane;
@@ -32,7 +33,7 @@ public class UrlDialog extends JDialog
 
     private DefaultTableModel model;
 
-    public UrlDialog(MainFrame parent, DefaultTableModel model)
+    public UrlDialog(MainFrame parent, DefaultTableModel model, String instancePath)
     {
         logger.info("Initializing");
         this.model = model;
@@ -44,7 +45,7 @@ public class UrlDialog extends JDialog
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setModal(true);
 
-        String mcDir = OSUtils.getMCdir(parent.getInstancePath());
+        String mcDir = OSUtils.getMCdir(instancePath, true);
         this.defaultRow[1] = mcDir + "/";
 
         this.table = new JTable(model);
@@ -70,7 +71,7 @@ public class UrlDialog extends JDialog
         this.setVisible(true);
     }
 
-    public static ArrayList<URLObj> create(MainFrame parent, ArrayList<URLObj> startingURLs)
+    public static ArrayList<URLObj> create(MainFrame parent, ArrayList<URLObj> startingURLs, String instancePath)
     {
         Object[][] rows = new Object[startingURLs.size()][];
         for (int i = 0; i < startingURLs.size(); i++) {
@@ -82,7 +83,7 @@ public class UrlDialog extends JDialog
         }
 
         DefaultTableModel model = new DefaultTableModel(rows, UrlDialog.cols);
-        new UrlDialog(parent, model);
+        new UrlDialog(parent, model, instancePath);
 
         ArrayList<URLObj> urls = new ArrayList<>();
         for (int i = 0; i < model.getRowCount(); i++)

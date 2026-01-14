@@ -1,4 +1,4 @@
-package com.konoca.frames;
+package com.konoca.frames.dialogs;
 
 import java.awt.BorderLayout;
 import java.nio.file.Path;
@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import com.konoca.frames.MainFrame;
 import com.konoca.objs.Augment;
 import com.konoca.objs.ModObj;
 import com.konoca.objs.URLObj;
@@ -28,7 +29,7 @@ public class ImportDialog extends JDialog
     private JButton cancelBtn;
 
 
-    public ImportDialog(MainFrame parent, Augment aug)
+    public ImportDialog(MainFrame parent, Augment augToImport, Augment currAug, Path instancePath)
     {
         logger.info("Initializing");
         this.setLocationRelativeTo(parent);
@@ -47,7 +48,7 @@ public class ImportDialog extends JDialog
 
         this.actionPanel = new JPanel();
         this.proceedBtn = new JButton("Yes");
-        this.proceedBtn.addActionListener(e -> this.handleImport(parent, aug));
+        this.proceedBtn.addActionListener(e -> this.handleImport(parent, augToImport, currAug, instancePath));
         this.actionPanel.add(this.proceedBtn);
 
         this.cancelBtn = new JButton("No");
@@ -59,30 +60,36 @@ public class ImportDialog extends JDialog
         this.setVisible(true);
     }
 
-    private void handleImport(MainFrame parent, Augment aug)
+    private void handleImport(MainFrame parent, Augment augToImport, Augment currAug, Path instancePath)
     {
         this.setTitle("Importing");
         this.remove(this.actionPanel);
         this.label.setText("Loading Augment...");
 
-        ArrayList<URLObj> urls = UrlDialog.create(parent, aug.urls);
+        if (OSUtils.getMCdir(instancePath) == null)
+        {
+            logger.info("MC directory does not exist, creating...");
+            String instanceMcDir = OSUtils.getMCdir(instancePath, true);
+            Path instanceMcDirPath = instancePath.resolve(instanceMcDir);
+            OSUtils.createDirectories(instanceMcDirPath);
+        }
 
-        Path instancePath = parent.getInstancePath();
+        ArrayList<URLObj> urls = UrlDialog.create(parent, augToImport.urls, instancePath.toString());
+
         urls.forEach(url -> OSUtils.downloadFile(url, instancePath));
 
-        Augment currAug = parent.getAugment();
-
-        ArrayList<ModObj> addMods = new ArrayList<>(aug.mods);
+        ArrayList<ModObj> addMods = new ArrayList<>(augToImport.mods);
         addMods.removeAll(currAug.mods);
 
         ArrayList<ModObj> deleteMods = new ArrayList<>(currAug.mods);
-        deleteMods.removeAll(aug.mods);
+        deleteMods.removeAll(augToImport.mods);
 
         Path modsPath = OSUtils.getModsPath(instancePath);
         OSUtils.createDirectories(modsPath.resolve(".index"));
 
         deleteMods.forEach(mod -> {
             this.label.setText("Deleting " + mod.name);
+
             String filename = mod.enabled ? mod.filename : mod.filename + ".disabled";
             Path path = modsPath.resolve(filename);
             Path tomlPath = modsPath.resolve(".index", mod.tomlName);
@@ -106,7 +113,7 @@ public class ImportDialog extends JDialog
             OSUtils.writeFile(tomlPath.toString(), mod.toTOML());
         });
 
-        aug.mods.forEach(mod -> {
+        augToImport.mods.forEach(mod -> {
             boolean isEnabled = PrismUtils.isModEnabled(instancePath, mod.filename);
             boolean shouldBeEnabled = mod.enabled;
 

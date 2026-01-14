@@ -2,7 +2,7 @@
 
 pkgs.mkShell {
     buildInputs = with pkgs; [
-        jdk24
+        javaPackages.compiler.openjdk25
         maven
         python311 # needed for jdtls lsp
     ];
