@@ -109,7 +109,7 @@ public class PrismUtils
         return OSUtils.pathExists(path); // mod is enabled if file exists, disabled = modFileName.disabled
     }
 
-    public static Pattern instanceNameP = Pattern.compile("\nname=.*\n");
+    public static Pattern instanceNameP = Pattern.compile("\nname=.*\r?\n");
     public static String getInstanceName(String instancePath)
     {
         Path path = OSUtils.getPath(instancePath);
