@@ -4,7 +4,7 @@
   <groupId>com.konoca</groupId>
   <artifactId>augmentation</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>2.0</version>
   <name>augmentation</name>
   <url>http://maven.apache.org</url>
   <dependencies>
