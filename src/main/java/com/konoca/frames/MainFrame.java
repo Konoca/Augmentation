@@ -3,6 +3,8 @@ package com.konoca.frames;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import com.konoca.Constants;
+import com.konoca.Updater;
+import com.konoca.frames.dialogs.UpdateDialog;
 import com.konoca.objs.Augment;
 import com.konoca.objs.URLObj;
 import com.konoca.utils.PrismUtils;
@@ -25,6 +27,9 @@ public class MainFrame extends JFrame
 
         drawPrismFrame();
         // drawInstanceFrame(null);
+
+        if (Updater.canUpdate())
+            new UpdateDialog(this);
     }
 
     public void drawPrismFrame()

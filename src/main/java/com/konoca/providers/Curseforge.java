@@ -1,8 +1,7 @@
 package com.konoca.providers;
 
-import java.net.HttpURLConnection;
+import java.net.CookieManager;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -13,6 +12,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.tomlj.TomlParseResult;
 
+import com.konoca.Constants;
 import com.konoca.objs.URLObj;
 import com.konoca.utils.OSUtils;
 
@@ -53,12 +53,18 @@ public class Curseforge extends Provider
         String cfURL = API + "/mods/" + this.modId + "/files/" + this.versionId;
         try {
             URI uri = URI.create(cfURL);
-            HttpClient client = HttpClient.newHttpClient();
+            HttpClient client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .cookieHandler(new CookieManager())
+                .build();
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
+                .header("User-Agent", "Augmentation")
+                .header("Accept", "application/json")
                 .GET()
                 .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (Constants.DEBUG) System.out.println("RESPONSE: " + response.body());
 
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject) parser.parse(response.body());
