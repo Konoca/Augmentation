@@ -5,4 +5,6 @@ public class Constants
     public static String WindowTitle = "Augmentation";
     public static int WindowWidth = 1000;
     public static int WindowHeight = 500;
+
+    public static boolean DEBUG = false;
 }
