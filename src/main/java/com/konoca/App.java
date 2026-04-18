@@ -17,6 +17,7 @@ public class App
     public static void main(String[] args)
     {
         logger.info("Starting up Augmentation...");
+        logger.info("Using version " + Constants.VERSION);
 
         if (args.length > 0) {
             logger.info("Entering DEBUG mode");
