@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -150,13 +151,28 @@ public class OSUtils
         Path absPath = urlObj.getAbsPath(instancePath);
 
         try {
-            URI uri = new URI(urlObj.getURL());
+            String rawUrl = urlObj.getURL();
+            String fixedSpaces = rawUrl.replace(" ", "%20");
+            String urlToUse = fixedSpaces;
+            logger.info("urlToUse= " + urlToUse);
+
+            URI uri = new URI(urlToUse);
             URL url = uri.toURL();
 
-            String outputName = URLDecoder.decode(Paths.get(url.getPath()).getFileName().toString(), "UTF-8");
-            Path outputPath = absPath.resolve(outputName);
-            Files.createDirectories(absPath);
+            Path urlPath = Paths.get(url.getPath());
+            String fileName = urlPath.getFileName().toString();
+            String decodedName = URLDecoder.decode(fileName, "UTF-8");
 
+            logger.info("urlPath= " + urlPath);
+            logger.info("fileName= " + fileName);
+
+            String outputName = decodedName;
+            logger.info("outputName= " + outputName);
+
+            Path outputPath = absPath.resolve(outputName);
+            logger.info("outputPath= " + outputPath);
+
+            Files.createDirectories(absPath);
             try (InputStream in = url.openStream()) {
                 Files.copy(in, outputPath, StandardCopyOption.REPLACE_EXISTING);
                 logger.info("Downloaded: " + outputPath.toString());
