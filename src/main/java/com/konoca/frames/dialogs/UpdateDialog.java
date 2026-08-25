@@ -60,7 +60,7 @@ public class UpdateDialog extends JDialog
         this.remove(this.label);
         this.remove(this.actionPanel);
 
-        this.label = new JLabel("There is an update available");
+        this.label = new JLabel(errMsg);
         this.label.setHorizontalAlignment(SwingConstants.CENTER);
         this.label.setHorizontalTextPosition(SwingConstants.CENTER);
         this.label.setVerticalAlignment(SwingConstants.CENTER);
